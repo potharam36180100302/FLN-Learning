@@ -1,22 +1,48 @@
 <!DOCTYPE html>
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) {
-      const tts = window.Capacitor.Plugins.TextToSpeech;
+  (function() {
+    function hookTTS() {
+      const tts = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech;
+      if (!tts) {
+        setTimeout(hookTTS, 300);
+        return;
+      }
+
+      if (!window.speechSynthesis) {
+        window.speechSynthesis = {};
+      }
+
       window.speechSynthesis.speak = function(utterance) {
-        tts.speak({
-          text: utterance.text,
-          lang: utterance.lang || 'en-US',
-          rate: utterance.rate || 1.0,
-          pitch: utterance.pitch || 1.0,
-          volume: 1.0
-        }).catch(err => console.error(err));
+        const textToSpeak = typeof utterance === 'string' ? utterance : (utterance && utterance.text ? utterance.text : '');
+        const langToUse = (utterance && utterance.lang) ? utterance.lang : 'en-US';
+        
+        if (textToSpeak) {
+          tts.speak({
+            text: textToSpeak,
+            lang: langToUse,
+            rate: (utterance && utterance.rate) ? utterance.rate : 0.9,
+            pitch: 1.0,
+            volume: 1.0,
+            category: 'ambient'
+          }).then(() => {
+            if (utterance && typeof utterance.onend === 'function') {
+              utterance.onend();
+            }
+          }).catch(err => console.error('TTS Error:', err));
+        }
       };
+
       window.speechSynthesis.cancel = function() {
         tts.stop().catch(() => {});
       };
+      
+      window.speechSynthesis.getVoices = function() {
+        return [{ name: 'Android Native', lang: 'en-US', default: true }];
+      };
     }
-  });
+
+    hookTTS();
+  })();
 </script>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
