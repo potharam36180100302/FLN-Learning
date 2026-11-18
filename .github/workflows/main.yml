@@ -29,7 +29,7 @@ jobs:
         mkdir -p www
         cp -r *.html *.css *.js www/ 2>/dev/null || true
         npm init -y
-        npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+        npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor-community/text-to-speech@6
         npx cap init "FLN Learning" "com.fln.learning" --web-dir=www
         npx cap add android
         npx cap sync
