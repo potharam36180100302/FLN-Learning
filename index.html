@@ -419,4 +419,31 @@ return h(Shell,{title:'FLN App',right,head,pages:stagePages,i:cur,setI:x=>sDp(p=
 })();
 return h(HC.Provider,{value:goHome},body,Toast)}
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+  window.say = function(text, lang) {
+  if (!text) return;
+  const cleanText = String(text).replace(/[^\w\s\u0C00-\u0C7F.,?!'-]/g, '').trim();
+  if (!cleanText) return;
+  
+  const isTelugu = /[\u0C00-\u0C7F]/.test(cleanText);
+  const targetLang = lang || (isTelugu ? 'te-IN' : 'en-IN');
+
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) {
+    const tts = window.Capacitor.Plugins.TextToSpeech;
+    tts.stop().catch(() => {}).finally(() => {
+      tts.speak({
+        text: cleanText,
+        lang: targetLang,
+        rate: 0.9,
+        pitch: 1.0,
+        volume: 1.0
+      }).catch(e => console.error(e));
+    });
+  } else if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(cleanText);
+    u.lang = targetLang;
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  }
+};
 </script></body></html>
