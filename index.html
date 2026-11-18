@@ -1,4 +1,23 @@
 <!DOCTYPE html>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) {
+      const tts = window.Capacitor.Plugins.TextToSpeech;
+      window.speechSynthesis.speak = function(utterance) {
+        tts.speak({
+          text: utterance.text,
+          lang: utterance.lang || 'en-US',
+          rate: utterance.rate || 1.0,
+          pitch: utterance.pitch || 1.0,
+          volume: 1.0
+        }).catch(err => console.error(err));
+      };
+      window.speechSynthesis.cancel = function() {
+        tts.stop().catch(() => {});
+      };
+    }
+  });
+</script>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FLN based learning app</title>
