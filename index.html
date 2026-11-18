@@ -417,7 +417,31 @@ const head=h('div',{className:'px-3 pb-2 shrink-0'},h('div',{className:'flex gap
 const stagePages=Array.from({length:N},(_,i)=>{const a=i?EN[i-1]+1:0,b=EN[i],op=isOpen(S,i,sb);return h('div',{key:i},h('h2',{className:'text-lg font-extrabold mb-1'},`${op?'🔓':'🔒'} ${SL} ${i+1} · ${a+1}–${b+1}`),!op&&h('p',{className:'text-sm font-bold mb-2'},`Pass ${TT[GT[i-1]].t} (${PASS*100}%) to open`),h('div',{className:'grid grid-cols-3 gap-2'+(op?'':' opacity-50')},TT.slice(a,b+1).map((t,j)=>{const k=a+j;return h('button',{key:k,onClick:()=>{if(op){tap();if(sb!='te')say(t.t.replace(/[‘’]/g,''));sV(o+k)}else toast(`🔒 Pass ${TT[GT[i-1]].t} (${PASS*100}%) to open ${SL} ${i+1}`)},className:`relative rounded-2xl p-1 pt-4 h-[6.2rem] flex flex-col items-center justify-center shadow-lg text-slate-800 active:scale-95 transition ${(t.y=='T'||t.test)?'bg-amber-300':COL[k%6]}`},h('span',{className:'absolute top-0.5 left-1.5 text-xs font-extrabold'},k+1),!tch&&S.best[o+k]!=null&&h('span',{className:'absolute top-0.5 right-1 text-xs'},'✅'),!op&&h('span',{className:'absolute top-0.5 right-1 text-xs'},'🔒'),h('div',{className:(t.e.length>2?'text-2xl':'text-4xl')+' leading-none'},t.e),h('div',{className:'text-[11px] font-bold leading-tight mt-1 line-clamp-2'},t.t))})))});
 return h(Shell,{title:'FLN App',right,head,pages:stagePages,i:cur,setI:x=>sDp(p=>({...p,[sb]:x}))});
 })();
-return h(HC.Provider,{value:goHome},body,Toast)}
+window.say = function(text, lang) {
+  if (!text) return;
+  const cleanText = String(text).replace(/[^\w\s\u0C00-\u0C7F.,?!'-]/g, '').trim();
+  if (!cleanText) return;
+
+  const isTelugu = /[\u0C00-\u0C7F]/.test(cleanText);
+  const targetLang = lang || (isTelugu ? 'te-IN' : 'en-US');
+
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) {
+    window.Capacitor.Plugins.TextToSpeech.speak({
+      text: cleanText,
+      lang: targetLang,
+      rate: 0.9,
+      pitch: 1.0,
+      volume: 1.0,
+      category: 'ambient'
+    }).catch(err => console.error('TTS Plugin Error:', err));
+  } else if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = targetLang;
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  }
+};
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));
   window.say = function(text, lang) {
   if (!text) return;
